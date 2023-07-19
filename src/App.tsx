@@ -51,7 +51,7 @@ function App() {
             src={result[0]?.phonetics[0].audio}
             autoPlay={false}
           />
-          <Button onClick={() => {let audio = document.getElementById('audio-player') as HTMLElement & { play : Function }; audio.play()}}></Button>
+          <Button onClick={() => {let audio = document.getElementById('audio-player') as HTMLAudioElement; audio.play()}}></Button>
           </Col>
           </Row>
       </Stack>
