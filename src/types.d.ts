@@ -5,7 +5,7 @@ export interface Word {
   phonetic: string
   phonetics: Phonetic[]
   meanings: Meaning[]
-  license: License2
+  license: License
   sourceUrls: string[]
 }
 
@@ -31,11 +31,6 @@ export interface Meaning {
 export interface Definition {
   definition: string
   synonyms: string[]
-  antonyms: any[]
+  antonyms: string[]
   example?: string
-}
-
-export interface License2 {
-  name: string
-  url: string
 }
