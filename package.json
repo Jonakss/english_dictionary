@@ -10,7 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/react-audio-player": "^0.13.0",
+    "bootstrap": "^5.3.0",
     "react": "^18.2.0",
+    "react-audio-player": "^0.17.0",
+    "react-bootstrap": "^2.8.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
