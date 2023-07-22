@@ -4,7 +4,7 @@ export interface Word {
   word: string
   phonetic: string
   phonetics: Phonetic[]
-  meanings: Meaning[]
+  meanings: TMeaning[]
   license: License
   sourceUrls: string[]
 }
@@ -21,7 +21,7 @@ export interface License {
   url: string
 }
 
-export interface Meaning {
+export interface TMeaning {
   partOfSpeech: string
   definitions: Definition[]
   synonyms: string[]
