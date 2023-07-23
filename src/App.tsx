@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ChakraProvider,
   Stack,
@@ -20,7 +20,7 @@ import {
 } from '@chakra-ui/react';
 import ReactAudioPlayer from 'react-audio-player';
 import MeaningsList from './components/meaning_list';
-import { MdPlayArrow, MdSearch } from 'react-icons/md'
+import { MdPlayArrow, MdSearch, MdShuffle } from 'react-icons/md'
 import { WordResult } from './types';
 import { search } from './services/search_word';
 
@@ -45,6 +45,7 @@ function capitalizeString(str: string) {
 }
 
 function App() {
+  const searchRef = useRef(null);
   const [word, setWord] = useState('');
   const [result, setResult] = useState<WordResult>([]);
   const [audio, setAudio] = useState<string>('');
@@ -62,24 +63,36 @@ function App() {
     setWord(searchWord.value)
   };
 
+  const handleRandomWord = async()=>{
+    let result = await fetch('https://random-word-api.herokuapp.com/word?lang=en')
+    .then(res => res.json())
+    .then(word => word);
+    setWord(result);
+  }
+
   return (
     <ChakraProvider theme={theme}>
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-      <VStack w={'100vw'} m="10vh auto 10vh auto" minWidth="40vw" px={'2vw'}>
+      <VStack w={'100vw'} m="10vh auto 10vh auto" minWidth="40vw" px={'3vw'}>
 
         <Stack spacing={2} >
           <form onSubmit={handleSearch} >
-            <InputGroup size={"lg"}>
+            <InputGroup size={"lg"} >
               <Input
                 name='searchWord'
                 placeholder="Type any word..."
                 aria-label="Type any word..."
                 aria-describedby="basic-addon2"
               />
-              <InputRightElement>
-                <IconButton aria-label='Search' icon={<MdSearch />} type='submit'>
-                  Search
-                </IconButton>
+              <InputRightElement w={'100px'}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <IconButton aria-label='Random word' icon={<MdShuffle />} onClick={handleRandomWord}>
+                    Random
+                  </IconButton>
+                  <IconButton aria-label='Search' ref={searchRef} icon={<MdSearch />} type='submit'>
+                    Search
+                  </IconButton>
+                </Stack>
               </InputRightElement>
             </InputGroup>
           </form>
@@ -99,12 +112,11 @@ function App() {
                     {
                       <Wrap direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
                         {result[0]?.phonetics?.map((phonetic, i) => (
-                          <Box key={`${phonetic}${i}`}>
+                          <Flex direction={'row'} key={`${phonetic}${i}`} justifyContent='space-evenly'>
                             <Box
                               as="div"
                               cursor="pointer"
                               onClick={() => setAudio(phonetic.audio)}
-                              display="inline-block"
                             >
                               <Text color={
                                 phonetic.audio
@@ -114,13 +126,10 @@ function App() {
                                   : 'gray'
                               }>{phonetic.text}</Text>
                             </Box>
-                              {i !== result[0].phonetics.length -1 && (
-                                <Box as="div" display="inline-block">
-
-                                  <Divider orientation="vertical" mx="2" borderColor="gray.300" />
-                                </Box>
-                              )}
-                          </Box>
+                            {i !== result[0].phonetics.length - 1 && (
+                              <Divider orientation="vertical" mx="2" borderColor="gray.300" />
+                            )}
+                          </Flex>
                         ))}
                       </Wrap>
                     }
