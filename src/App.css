@@ -3,6 +3,8 @@
 body{
   background-color: #002029;
   color: aliceblue;
+  margin: auto;
+  padding: 0;
 }
 
 #root {

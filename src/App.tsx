@@ -64,7 +64,7 @@ function App() {
   return (
     <ChakraProvider theme={theme}>
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-      <Center mt={"10vh"} mb="10vh" minWidth="60vw" ml="20vw">
+      <Center w={'100vw'} m="10vh auto 10vh auto" minWidth="60vw">
 
         <Stack spacing={2} minWidth={"50vw"}>
           <form onSubmit={handleSearch} >
