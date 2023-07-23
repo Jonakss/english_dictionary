@@ -14,10 +14,8 @@ import {
   Flex,
   Divider,
   Box,
-  Button,
   IconButton,
-  InputRightElement,
-  useColorMode
+  InputRightElement
 } from '@chakra-ui/react';
 import ReactAudioPlayer from 'react-audio-player';
 import MeaningsList from './components/meaning_list';
