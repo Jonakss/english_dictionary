@@ -63,10 +63,10 @@ function App() {
     setWord(searchWord.value)
   };
 
-  const handleRandomWord = async()=>{
-    let result = await fetch('https://random-word-api.herokuapp.com/word?lang=en')
-    .then(res => res.json())
-    .then(word => word);
+  const handleRandomWord = async () => {
+    let result = await fetch('https://random-word.ryanrk.com/api/en/word/random')
+      .then(res => res.json())
+      .then(word => word);
     setWord(result);
   }
 
@@ -112,24 +112,27 @@ function App() {
                     {
                       <Wrap direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
                         {result[0]?.phonetics?.map((phonetic, i) => (
-                          <Flex direction={'row'} key={`${phonetic}${i}`} justifyContent='space-evenly'>
-                            <Box
-                              as="div"
-                              cursor="pointer"
-                              onClick={() => setAudio(phonetic.audio)}
-                            >
-                              <Text color={
-                                phonetic.audio
-                                  ? audio === phonetic.audio
-                                    ? 'green'
-                                    : 'IndianRed'
-                                  : 'gray'
-                              }>{phonetic.text}</Text>
-                            </Box>
-                            {i !== result[0].phonetics.length - 1 && (
-                              <Divider orientation="vertical" mx="2" borderColor="gray.300" />
-                            )}
-                          </Flex>
+                          phonetic.text ? (
+
+                            <Flex direction={'row'} key={`${phonetic}${i}`} justifyContent='space-evenly'>
+                              <Box
+                                as="div"
+                                cursor="pointer"
+                                onClick={() => setAudio(phonetic.audio)}
+                              >
+                                <Text color={
+                                  phonetic.audio
+                                    ? audio === phonetic.audio
+                                      ? 'green'
+                                      : 'IndianRed'
+                                    : 'gray'
+                                }>{`${phonetic.text} ${phonetic.audio !== '' ? " - " + phonetic.audio.match(/(?!-)(.{2})(?=.mp3)/g) : ''}`}</Text>
+                              </Box>
+                              {i !== result[0].phonetics.length - 1 && (
+                                <Divider orientation="vertical" mx="2" borderColor="gray.300" />
+                              )}
+                            </Flex>
+                          ):''
                         ))}
                       </Wrap>
                     }
