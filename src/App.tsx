@@ -7,7 +7,7 @@ import {
   Grid,
   GridItem,
   Text,
-  Center,
+  Wrap,
   ColorModeScript,
   extendTheme,
   Heading,
@@ -15,7 +15,8 @@ import {
   Divider,
   Box,
   IconButton,
-  InputRightElement
+  InputRightElement,
+  VStack
 } from '@chakra-ui/react';
 import ReactAudioPlayer from 'react-audio-player';
 import MeaningsList from './components/meaning_list';
@@ -64,9 +65,9 @@ function App() {
   return (
     <ChakraProvider theme={theme}>
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-      <Center w={'100vw'} m="10vh auto 10vh auto" minWidth="60vw">
+      <VStack w={'100vw'} m="10vh auto 10vh auto" minWidth="40vw" px={'2vw'}>
 
-        <Stack spacing={2} minWidth={"50vw"}>
+        <Stack spacing={2} >
           <form onSubmit={handleSearch} >
             <InputGroup size={"lg"}>
               <Input
@@ -88,7 +89,7 @@ function App() {
               <p >Loading...</p>
             </Box>
           ) : (
-            <Grid templateColumns="repeat(1, 1fr)" p={4}>
+            <Grid templateColumns="repeat(1, 1fr)" p={1}>
               <GridItem>
                 <Flex direction={'row'} justifyContent="space-between" alignItems={"center"}>
                   <Flex direction={"column"}>
@@ -96,7 +97,7 @@ function App() {
                       {capitalizeString(result[0]?.word)}
                     </Heading>
                     {
-                      <Flex direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
+                      <Wrap direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
                         {result[0]?.phonetics?.map((phonetic, i) => (
                           <Box key={`${phonetic}${i}`}>
                             <Box
@@ -121,7 +122,7 @@ function App() {
                               )}
                           </Box>
                         ))}
-                      </Flex>
+                      </Wrap>
                     }
                   </Flex>
                   <Box>
@@ -148,13 +149,13 @@ function App() {
                 </Flex>
               </GridItem>
 
-              <GridItem justifySelf={"end"} w="60vw">
+              <GridItem justifySelf={"center"}>
                 <MeaningsList meanings={result[0]?.meanings}></MeaningsList>
               </GridItem>
             </Grid>
           )}
         </Stack>
-      </Center>
+      </VStack>
     </ChakraProvider>
   );
 }

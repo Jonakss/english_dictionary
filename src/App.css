@@ -1,14 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap');
 
 body{
-  background-color: #002029;
-  color: aliceblue;
   margin: auto;
   padding: 0;
 }
 
 #root {
-  max-width: 860px;
   margin: 0 auto;
   padding: 2rem;
 }
