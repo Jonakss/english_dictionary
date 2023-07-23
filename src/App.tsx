@@ -4,7 +4,6 @@ import {
   Stack,
   InputGroup,
   Input,
-  Button,
   Grid,
   GridItem,
   Text,
@@ -15,19 +14,25 @@ import {
   Flex,
   Divider,
   Box,
-  IconButton
+  Button,
+  IconButton,
+  InputRightElement,
+  useColorMode
 } from '@chakra-ui/react';
 import ReactAudioPlayer from 'react-audio-player';
 import MeaningsList from './components/meaning_list';
-import {MdPlayArrow} from 'react-icons/md'
+import { MdPlayArrow, MdSearch } from 'react-icons/md'
 import { WordResult } from './types';
 import { search } from './services/search_word';
-import Meaning from './components/meaning';
 
 
 const config = {
   initialColorMode: 'dark', // Puedes cambiarlo a 'light' si deseas el modo claro por defecto
   useSystemColorMode: true, // Habilitar para permitir que los usuarios usen la configuración del sistema
+  fonts: {
+    heading: `'Libre Baskerville', serif`,
+    body: `'Raleway', sans-serif`,
+  },
 };
 
 const theme = extendTheme({ config });
@@ -49,7 +54,7 @@ function App() {
     console.log(word)
     if (word == null || word === '') return;
     search(word).then(word => setResult(word));
-    setAudio(result[0]?.phonetics[0].audio || '')
+    setAudio('')
   }, [word]);
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
@@ -61,37 +66,41 @@ function App() {
   return (
     <ChakraProvider theme={theme}>
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-      <Center h="100vh" w="80vw" ml="10vw">
+      <Center mt={"10vh"} mb="10vh" minWidth="60vw" ml="20vw">
 
-        <Stack spacing={2}>
-          <form onSubmit={handleSearch}>
-            <InputGroup>
+        <Stack spacing={2} minWidth={"50vw"}>
+          <form onSubmit={handleSearch} >
+            <InputGroup size={"lg"}>
               <Input
                 name='searchWord'
                 placeholder="Type any word..."
                 aria-label="Type any word..."
                 aria-describedby="basic-addon2"
               />
-              <Button type='submit' variant="outline">
-                Search
-              </Button>
+              <InputRightElement>
+                <IconButton aria-label='Search' icon={<MdSearch />} type='submit'>
+                  Search
+                </IconButton>
+              </InputRightElement>
             </InputGroup>
           </form>
 
           {result.length === 0 ? (
-            <p>Loading...</p>
+            <Box p={6}>
+              <p >Loading...</p>
+            </Box>
           ) : (
-            <Grid templateColumns="repeat(2, 1fr)" alignItems={"center"}>
+            <Grid templateColumns="repeat(1, 1fr)" p={4}>
               <GridItem>
-                <>
-                  <Heading as={"h1"} fontWeight={'bold'} fontSize={'xxxl'} fontFamily={'fantasy'}>
-                    {capitalizeString(result[0]?.word)}
-                  </Heading>
-                  <Flex>
+                <Flex direction={'row'} justifyContent="space-between" alignItems={"center"}>
+                  <Flex direction={"column"}>
+                    <Heading as={"h1"} fontWeight={'bold'} fontFamily={'Libre Baskerville'} fontSize={'xxxl'}>
+                      {capitalizeString(result[0]?.word)}
+                    </Heading>
                     {
-                      <Flex alignItems="center" justify={'space-between'}>
+                      <Flex direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
                         {result[0]?.phonetics?.map((phonetic, i) => (
-                          <>
+                          <Box key={`${phonetic}${i}`}>
                             <Box
                               as="div"
                               cursor="pointer"
@@ -106,43 +115,43 @@ function App() {
                                   : 'gray'
                               }>{phonetic.text}</Text>
                             </Box>
-                            {i !== result[0]?.phonetics.length - 1 && (
-                              <Divider orientation="vertical" mx="2" borderColor="gray.300" />
-                            )}
-                          </>
+                              {i !== result[0].phonetics.length -1 && (
+                                <Box as="div" display="inline-block">
+
+                                  <Divider orientation="vertical" mx="2" borderColor="gray.300" />
+                                </Box>
+                              )}
+                          </Box>
                         ))}
                       </Flex>
                     }
                   </Flex>
-                </>
+                  <Box>
+
+                    {audio !== '' ? (
+                      <ReactAudioPlayer id='audio-player' src={audio} autoPlay={false} />
+                    ) : null}
+                    <IconButton
+                      aria-label="Play"
+                      borderRadius="50%" // Hace que el botón sea redondo
+                      bgColor={audio ? 'DarkKhaki' : 'gray'} // Cambia el color según la disponibilidad de audio
+                      width="60px" // Ajustamos el ancho del botón para centrarlo
+                      height="60px" // Ajustamos el alto del botón para centrarlo
+                      icon={<MdPlayArrow />}
+                      onClick={() => {
+                        const audioElement = document.getElementById('audio-player') as HTMLAudioElement;
+                        if (audioElement && audio) {
+                          audioElement.play();
+                        }
+                      }}
+                      isDisabled={!audio || audio === ''}
+                    />
+                  </Box>
+                </Flex>
               </GridItem>
 
-              <GridItem justifySelf={"end"}>
-                <Box>
-
-                  {audio !== '' ? (
-                    <ReactAudioPlayer id='audio-player' src={audio} autoPlay={false} />
-                  ) : null}
-                  <IconButton
-                    aria-label="Play"
-                    borderRadius="50%" // Hace que el botón sea redondo
-                    bgColor={audio ? 'DarkKhaki' : 'gray'} // Cambia el color según la disponibilidad de audio
-                    width="60px" // Ajustamos el ancho del botón para centrarlo
-                    height="60px" // Ajustamos el alto del botón para centrarlo
-                    icon={<MdPlayArrow />}
-                    onClick={() => {
-                      const audioElement = document.getElementById('audio-player') as HTMLAudioElement;
-                      if (audioElement && audio) {
-                        audioElement.play();
-                      }
-                    }}
-                    isDisabled={!audio || audio === ''}
-                  />
-                </Box>
-              </GridItem>
-              <GridItem>
-                <MeaningsList meanings={result[0].meanings}></MeaningsList>
-                <Meaning meaning={result[0].meanings[0]}></Meaning>
+              <GridItem justifySelf={"end"} w="60vw">
+                <MeaningsList meanings={result[0]?.meanings}></MeaningsList>
               </GridItem>
             </Grid>
           )}

@@ -8,12 +8,12 @@ type Props = {
 
 const MeaningsList = (props: Props) => {
     let meanings = props.meanings
-    if (!meanings == null) { console.log("!m"); return null;}
+    if (meanings == null) { return null;}
     return (
         <Stack>
             <>
                 {meanings.map((meanign: TMeaning) => {
-                    <Meaning key={meanign.partOfSpeech} meaning={meanign} />
+                    return <Meaning key={meanign.partOfSpeech} meaning={meanign} />
                 })}
             </>
         </Stack>
