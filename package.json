@@ -9,7 +9,8 @@
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "deploy": "npm run build; gh-pages -d dist"
+    "predeploy": "npm run build; git add dist/ -f; git commit -m 'release: dist'; git push origin main;",
+    "deploy": "npm run predeploy; git push origin :gh-pages && git subtree push --prefix dist origin gh-pages"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.0",
