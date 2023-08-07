@@ -1,8 +1,9 @@
 import { type TMeaning } from '../types'
-import { Text, ListItem, Flex, Divider, Box, Wrap, WrapItem, UnorderedList, HStack } from '@chakra-ui/react'
+import { Text, ListItem, Flex, Divider, Box, Button, Wrap, WrapItem, UnorderedList, HStack } from '@chakra-ui/react'
 
 interface Props {
   meaning: TMeaning
+  changeWord: (synonym: string) => void
   key?: string
 }
 
@@ -11,8 +12,8 @@ function Meaning (props: Props): JSX.Element | null {
   if (meaning == null) return null
 
   return (
-        <div>
-            <div>
+        <Box>
+            <Box>
                 <Flex direction="column">
                     <Flex align={'center'}>
                         <Text fontWeight={'bold'}>{meaning.partOfSpeech}</Text>
@@ -34,43 +35,43 @@ function Meaning (props: Props): JSX.Element | null {
                             ))}
                         </UnorderedList>
                     </Box>
+
+                    {meaning.synonyms.length === 0
+                      ? null
+                      : (
+                            <Box>
+                                <Flex direction="row" justify="flex-start">
+                                    <Text fontWeight={'bold'}>Synonyms:</Text>
+                                </Flex>
+                                <Wrap justify="flex-start" pl={'2em'}>
+                                    {meaning.synonyms.map((synonym, i) => (
+                                        <WrapItem key={`${synonym}${i}`}>
+                                            <Button as="a" onClick={() => { props.changeWord(synonym) }}>{synonym}</Button>
+                                        </WrapItem>
+                                    ))}
+                                </Wrap>
+                            </Box>
+                        )}
+
+                    {meaning.antonyms.length === 0
+                      ? null
+                      : (
+                            <Box>
+                                <Flex direction="row" justify="flex-start">
+                                    <Text fontWeight={'bold'}>Antonyms:</Text>
+                                </Flex>
+                                <Wrap justify="flex-start" pl={'2em'}>
+                                    {meaning.antonyms.map((antonym, i) => (
+                                        <WrapItem key={`${antonym}${i}`}>
+                                            <Button as="a" onClick={() => { props.changeWord(antonym) }}>{antonym}</Button>
+                                        </WrapItem>
+                                    ))}
+                                </Wrap>
+                            </Box>
+                        )}
                 </Flex>
-
-                {meaning.synonyms.length === 0
-                  ? null
-                  : (
-                    <Box>
-                        <Flex direction="row" justify="flex-start">
-                            <Text fontWeight={'bold'}>Synonyms:</Text>
-                        </Flex>
-                        <Wrap justify="flex-start" pl={'2em'}>
-                            {meaning.synonyms.map((synonym, i) => (
-                                <WrapItem key={`${synonym}${i}`}>
-                                    <Text>{synonym}</Text>
-                                </WrapItem>
-                            ))}
-                        </Wrap>
-                    </Box>
-                    )}
-
-                {meaning.antonyms.length === 0
-                  ? null
-                  : (
-                    <Box>
-                        <Flex direction="row" justify="flex-start">
-                            <Text fontWeight={'bold'}>Antonyms:</Text>
-                        </Flex>
-                        <Wrap justify="flex-start" pl={'2em'}>
-                            {meaning.antonyms.map((antonym, i) => (
-                                <WrapItem key={`${antonym}${i}`}>
-                                    <Text>{antonym}</Text>
-                                </WrapItem>
-                            ))}
-                        </Wrap>
-                    </Box>
-                    )}
-            </div>
-        </div>
+            </Box>
+        </Box>
   )
 }
 

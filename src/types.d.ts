@@ -1,5 +1,4 @@
 export type WordResult = Word[]
-
 export interface Word {
   word: string
   phonetic: string
@@ -33,4 +32,16 @@ export interface Definition {
   synonyms: string[]
   antonyms: string[]
   example?: string
+}
+
+export // Define los tipos de acción que pueden ocurrir en el reducer
+type Action =
+  | { type: 'LOADING' }
+  | { type: 'SEARCH_SUCCESS', payload: WordResult }
+  | { type: 'SEARCH_FAILURE' }
+
+export // Define una interfaz para el estado
+interface AppState {
+  loading: boolean
+  result: WordResult | undefined
 }

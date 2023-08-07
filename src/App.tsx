@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useReducer } from 'react'
 import {
   ChakraProvider,
   Stack,
@@ -21,7 +21,7 @@ import {
 import ReactAudioPlayer from 'react-audio-player'
 import MeaningsList from './components/meaning_list'
 import { MdPlayArrow, MdSearch, MdShuffle } from 'react-icons/md'
-import { type WordResult } from './types'
+import { type Action, type AppState } from './types'
 import { search } from './services/search_word'
 
 const config = {
@@ -43,31 +43,66 @@ function capitalizeString (str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }
 
+// Define el estado inicial
+const initialState: AppState = {
+  loading: false,
+  result: undefined
+}
+// Define el reducer que manejará las acciones y actualización del estado
+const reducer = (state: AppState, action: Action): AppState => {
+  if (action.type === 'LOADING') {
+    return { ...state, loading: true, result: undefined }
+  }
+
+  if (action.type === 'SEARCH_SUCCESS') {
+    return { ...state, loading: false, result: action.payload }
+  }
+
+  if (action.type === 'SEARCH_FAILURE') {
+    return { ...state, loading: false, result: undefined }
+  }
+
+  return state
+}
+
 function App (): JSX.Element {
-  const searchRef = useRef(null)
   const [word, setWord] = useState('')
-  const [result, setResult] = useState<WordResult>([])
+  const [state, dispatch] = useReducer(reducer, initialState)
   const [audio, setAudio] = useState<string>('')
+  const [searchText, setsearchText] = useState('')
 
   useEffect(() => {
-    const loadWord = async (): Promise<void> => {
-      console.log(word)
-      if (word != null || word !== '') { await search(word).then(word => { setResult(word) }) }
-      setAudio('')
+    dispatch({ type: 'LOADING' })
+
+    if (word !== '') {
+      search(word)
+        .then((wordResult) => {
+          if (wordResult == null) {
+            dispatch({ type: 'SEARCH_FAILURE' })
+          } else {
+            dispatch({ type: 'SEARCH_SUCCESS', payload: wordResult })
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+          dispatch({ type: 'SEARCH_FAILURE' })
+        })
+    } else {
+      dispatch({ type: 'LOADING' })
     }
-    loadWord().then(() => {}).catch(err => { console.error(err) })
+
+    setAudio('')
   }, [word])
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault()
-    const { searchWord } = e.target as typeof e.target & { searchWord: { value: string } }
-    setWord(searchWord.value)
+    setWord(searchText)
   }
 
   const handleRandomWord = async (): Promise<void> => {
     await fetch('https://random-word.ryanrk.com/api/en/word/random')
       .then(async res => await res.json())
-      .then(word => { setResult(word) })
+      .then(word => { setWord(word); setsearchText(word) })
       .catch(e => { console.error(e); return [] })
   }
 
@@ -75,6 +110,15 @@ function App (): JSX.Element {
     const label = phoneticText.match(/(?!-)(.{2})(?=.mp3)/g)
     if (label == null) return ''
     return ` - ${label[0]}`
+  }
+
+  const handleOnChangeSearch = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setsearchText(e.target.value)
+  }
+
+  const changeSearch = (word: string): void => {
+    setsearchText(word)
+    setWord(word)
   }
 
   return (
@@ -87,6 +131,8 @@ function App (): JSX.Element {
             <InputGroup size={'lg'} >
               <Input
                 name='searchWord'
+                onChange={handleOnChangeSearch}
+                value={searchText}
                 placeholder="Type any word..."
                 aria-label="Type any word..."
                 aria-describedby="basic-addon2"
@@ -96,7 +142,7 @@ function App (): JSX.Element {
                   <IconButton aria-label='Random word' icon={<MdShuffle />} onClick={() => { handleRandomWord().catch(e => { console.error(e) }) }}>
                     Random
                   </IconButton>
-                  <IconButton aria-label='Search' ref={searchRef} icon={<MdSearch />} type='submit'>
+                  <IconButton aria-label='Search' icon={<MdSearch />} type='submit'>
                     Search
                   </IconButton>
                 </Stack>
@@ -104,46 +150,50 @@ function App (): JSX.Element {
             </InputGroup>
           </form>
 
-          {result.length === 0
-            ? (
+          {state.loading && (
             <Box p={6}>
-              <p >Loading...</p>
+              <p >Search for a english word.</p>
             </Box>
-              )
-            : (
+          )}
+          {state.result === undefined && !state.loading && (
+            <Box p={6}>
+              <p>No result found.</p>
+            </Box>
+          )}
+          {state.result !== undefined && (
             <Grid templateColumns="repeat(1, 1fr)" p={1}>
               <GridItem>
                 <Flex direction={'row'} justifyContent="space-between" alignItems={'center'}>
                   <Flex direction={'column'}>
                     <Heading as={'h1'} fontWeight={'bold'} fontFamily={'Libre Baskerville'} fontSize={'xxxl'}>
-                      {capitalizeString(result[0]?.word)}
+                      {capitalizeString(state.result[0]?.word)}
                     </Heading>
                     {
                       <Wrap direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
-                        {result[0]?.phonetics?.map((phonetic, i) => (
+                        {state.result[0]?.phonetics?.map((phonetic, i) => (
                           phonetic.text !== '' // null
                             ? (
 
-                            <Flex direction={'row'} key={`${phonetic.text}_${i}`} justifyContent='space-evenly'>
-                              <Box
-                                as="div"
-                                cursor="pointer"
-                                onClick={() => { setAudio(phonetic.audio) }}
-                              >
-                                <Text color={
-                                  (phonetic.audio !== '')
-                                    ? audio === phonetic.audio
-                                      ? 'green'
-                                      : 'IndianRed'
-                                    : 'gray'
-                                }>{
-                                  `${phonetic.text} ${getPhoneticLabel(phonetic.audio)}`
-                                  }</Text>
-                              </Box>
-                              {i !== result[0].phonetics.length - 1 && (
-                                <Divider orientation="vertical" mx="2" borderColor="gray.300" />
-                              )}
-                            </Flex>
+                              <Flex direction={'row'} key={`${phonetic.text}_${i}`} justifyContent='space-evenly'>
+                                <Box
+                                  as="div"
+                                  cursor="pointer"
+                                  onClick={() => { setAudio(phonetic.audio) }}
+                                >
+                                  <Text color={
+                                    (phonetic.audio !== '')
+                                      ? audio === phonetic.audio
+                                        ? 'green'
+                                        : 'IndianRed'
+                                      : 'gray'
+                                  }>{
+                                      `${phonetic.text} ${getPhoneticLabel(phonetic.audio)}`
+                                    }</Text>
+                                </Box>
+                                {state.result != null && i !== state.result[0]?.phonetics.length - 1 && (
+                                  <Divider orientation="vertical" mx="2" borderColor="gray.300" />
+                                )}
+                              </Flex>
                               )
                             : ''
                         ))}
@@ -154,7 +204,7 @@ function App (): JSX.Element {
 
                     {audio !== ''
                       ? (
-                      <ReactAudioPlayer id='audio-player' src={audio} autoPlay={false} />
+                        <ReactAudioPlayer id='audio-player' src={audio} autoPlay={false} />
                         )
                       : null}
                     <IconButton
@@ -175,10 +225,10 @@ function App (): JSX.Element {
               </GridItem>
 
               <GridItem justifySelf={'center'}>
-                <MeaningsList meanings={result[0]?.meanings}></MeaningsList>
+                <MeaningsList changeWord={changeSearch} meanings={state.result[0]?.meanings}></MeaningsList>
               </GridItem>
             </Grid>
-              )}
+          )}
         </Stack>
       </VStack>
     </ChakraProvider>

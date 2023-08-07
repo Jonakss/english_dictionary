@@ -3,7 +3,8 @@ import Meaning from './meaning'
 import { Stack } from '@chakra-ui/react'
 
 interface Props {
-  meanings: TMeaning[]
+  meanings?: TMeaning[]
+  changeWord: (synonym: string) => void
 }
 
 const MeaningsList = (props: Props): JSX.Element | null => {
@@ -12,8 +13,8 @@ const MeaningsList = (props: Props): JSX.Element | null => {
   return (
         <Stack>
             <>
-                {meanings.map((meanign: TMeaning) => {
-                  return <Meaning key={meanign.partOfSpeech} meaning={meanign} />
+                {meanings.map((meanign: TMeaning, i) => {
+                  return <Meaning key={`${meanign.partOfSpeech}_${i}`} changeWord={props.changeWord} meaning={meanign} />
                 })}
             </>
         </Stack>
