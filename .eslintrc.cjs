@@ -1,4 +1,5 @@
 module.exports = {
+    "root": true,
     "env": {
         "browser": true,
         "es2021": true
@@ -23,11 +24,17 @@ module.exports = {
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module",
-        "project": "./tsconfig.json"
+        "project": "./tsconfig.json",
     },
     "plugins": [
+        "@typescript-eslint",
         "react"
     ],
     "rules": {
+        "@typescript-eslint/restrict-template-expressions": "error",
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-uses-react": "off",
+        "react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }], //should add ".ts" if typescript project
+        
     }
 }
