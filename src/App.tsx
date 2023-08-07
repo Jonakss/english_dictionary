@@ -20,7 +20,7 @@ import {
 } from '@chakra-ui/react'
 import ReactAudioPlayer from 'react-audio-player'
 import MeaningsList from './components/meaning_list'
-import { MdPlayArrow, MdSearch, MdShuffle } from 'react-icons/md'
+import { MdArrowLeft, MdPlayArrow, MdSearch, MdShuffle } from 'react-icons/md'
 import { type Action, type AppState } from './types'
 import { search } from './services/search_word'
 
@@ -70,6 +70,7 @@ function App (): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialState)
   const [audio, setAudio] = useState<string>('')
   const [searchText, setsearchText] = useState('')
+  const [historySearch, setHistorySearch] = useState<string[]>([])
 
   useEffect(() => {
     dispatch({ type: 'LOADING' })
@@ -92,17 +93,31 @@ function App (): JSX.Element {
     }
 
     setAudio('')
+    console.log(historySearch)
   }, [word])
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault()
+    if (word !== '' && state.result !== undefined) setHistorySearch(prevHistory => [word, ...prevHistory])
     setWord(searchText)
+  }
+
+  const goBack = (): void => {
+    if (historySearch.length > 0) {
+      const [last, ...restHistory] = historySearch
+      changeSearch(last)
+      setHistorySearch(() => restHistory)
+    } else {
+      setsearchText('')
+      dispatch({ type: 'LOADING' })
+    }
+    console.log(historySearch)
   }
 
   const handleRandomWord = async (): Promise<void> => {
     await fetch('https://random-word.ryanrk.com/api/en/word/random')
       .then(async res => await res.json())
-      .then(word => { setWord(word); setsearchText(word) })
+      .then(word => { changeSearch(word) })
       .catch(e => { console.error(e); return [] })
   }
 
@@ -127,8 +142,9 @@ function App (): JSX.Element {
       <VStack w={'100vw'} m="10vh auto 10vh auto" minWidth="40vw" px={'3vw'}>
 
         <Stack spacing={2} >
-          <form onSubmit={handleSearch} >
+          <form onSubmit={handleSearch}>
             <InputGroup size={'lg'} >
+              <IconButton disabled={historySearch.length === 0} aria-label='Search' icon={<MdArrowLeft />} onClick={goBack}></IconButton>
               <Input
                 name='searchWord'
                 onChange={handleOnChangeSearch}
